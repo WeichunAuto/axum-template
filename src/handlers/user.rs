@@ -1,5 +1,6 @@
 use axum::{
     extract::{Path, Query},
+    http::StatusCode,
     Json,
 };
 use serde::Deserialize;
@@ -12,15 +13,34 @@ pub struct UserQuery {
 }
 
 // 从 URL Path 中接收字段 id, name
-// 访问路径：http://127.0.0.1:8099/users/44/bobby?active=true
+// 访问路径：http://127.0.0.1:8099/query_user/44/bobby?active=true
 pub async fn get_user(
     Path((id, name)): Path<(u32, String)>,
-    Query(query): Query<UserQuery>,
+    Query(params): Query<UserQuery>,
 ) -> Json<UserResponse> {
     let user = UserResponse {
         id,
         name,
-        active: query.active.unwrap_or(false), // 如果未带 active 查询参数，则默认false
+        active: params.active.unwrap_or(false), // 如果未带 active 查询参数，则默认false
     };
     Json(user)
+}
+
+/**
+ * 返回错误码的 handler 函数
+ */
+pub async fn get_error(
+    Path((id, name)): Path<(u32, String)>,
+) -> Result<Json<UserResponse>, StatusCode> {
+    if id < 10 {
+        Err(StatusCode::BAD_REQUEST)
+    } else if id < 20 {
+        Err(StatusCode::NOT_FOUND)
+    } else {
+        Ok(Json(UserResponse {
+            id,
+            name,
+            active: false,
+        }))
+    }
 }
