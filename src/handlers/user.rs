@@ -5,11 +5,21 @@ use axum::{
 };
 use serde::Deserialize;
 
-use crate::models::user::UserResponse;
+use crate::models::user::{User, UserResponse};
 
 #[derive(Deserialize)]
 pub struct UserQuery {
     pub active: Option<bool>,
+}
+
+// 创建一个 user
+pub async fn create_user(Json(user): Json<User>) -> Json<UserResponse> {
+    let new_user = UserResponse {
+        id: 1,
+        name: user.name,
+        active: true,
+    };
+    Json(new_user)
 }
 
 // 从 URL Path 中接收字段 id, name
