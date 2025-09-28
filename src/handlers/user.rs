@@ -12,7 +12,10 @@ pub struct UserQuery {
     pub active: Option<bool>,
 }
 
-// 创建一个 user
+/// Handler for creating a new user.
+///
+/// - Expects a JSON body matching the `User` struct.
+/// - Returns a `UserResponse` wrapped in JSON.
 pub async fn create_user(Json(user): Json<User>) -> Json<UserResponse> {
     let new_user = UserResponse {
         id: 1,
@@ -22,8 +25,9 @@ pub async fn create_user(Json(user): Json<User>) -> Json<UserResponse> {
     Json(new_user)
 }
 
-// 从 URL Path 中接收字段 id, name
-// 访问路径：http://127.0.0.1:8099/query_user/44/bobby?active=true
+/// Handler for fetching a user by `id` and `name`.
+///
+/// Example request: `http://127.0.0.1:8099/api/query_user/44/bobby?active=true`
 pub async fn get_user(
     Path((id, name)): Path<(u32, String)>,
     Query(params): Query<UserQuery>,
@@ -31,14 +35,12 @@ pub async fn get_user(
     let user = UserResponse {
         id,
         name,
-        active: params.active.unwrap_or(false), // 如果未带 active 查询参数，则默认false
+        active: params.active.unwrap_or(false), // If not provided, defaults to `false`.
     };
     Json(user)
 }
 
-/**
- * 返回错误码的 handler 函数
- */
+/// Handler for demonstrating error responses.
 pub async fn get_error(
     Path((id, name)): Path<(u32, String)>,
 ) -> Result<Json<UserResponse>, StatusCode> {
