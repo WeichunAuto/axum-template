@@ -8,7 +8,7 @@ use serde::Deserialize;
 use crate::models::user::{User, UserResponse};
 
 #[derive(Deserialize)]
-pub struct UserQuery {
+pub(crate) struct UserQuery {
     pub active: Option<bool>,
 }
 
@@ -16,10 +16,10 @@ pub struct UserQuery {
 ///
 /// - Expects a JSON body matching the `User` struct.
 /// - Returns a `UserResponse` wrapped in JSON.
-pub async fn create_user(Json(user): Json<User>) -> Json<UserResponse> {
+pub(crate) async fn create_user(Json(user): Json<User>) -> Json<UserResponse> {
     let new_user = UserResponse {
         id: 1,
-        name: user.name,
+        name: format!("{}{}", user.name, user.password.len()),
         active: true,
     };
     Json(new_user)
@@ -28,7 +28,7 @@ pub async fn create_user(Json(user): Json<User>) -> Json<UserResponse> {
 /// Handler for fetching a user by `id` and `name`.
 ///
 /// Example request: `http://127.0.0.1:8099/api/query_user/44/bobby?active=true`
-pub async fn get_user(
+pub(crate) async fn get_user(
     Path((id, name)): Path<(u32, String)>,
     Query(params): Query<UserQuery>,
 ) -> Json<UserResponse> {
@@ -41,7 +41,7 @@ pub async fn get_user(
 }
 
 /// Handler for demonstrating error responses.
-pub async fn get_error(
+pub(crate) async fn get_error(
     Path((id, name)): Path<(u32, String)>,
 ) -> Result<Json<UserResponse>, StatusCode> {
     if id < 10 {

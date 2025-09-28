@@ -1,3 +1,3 @@
-pub mod handlers;
-pub mod models;
+pub(crate) mod handlers;
+pub(crate) mod models;
 pub mod routes;

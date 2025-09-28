@@ -11,7 +11,7 @@ use crate::handlers::user;
 /// - `/query_user/{id}/{name}` (GET): Calls `user::get_user` to query a user.
 /// - `/query_user_error/{id}/{name}` (GET): Calls `user::get_error` to demonstrate or handle an error case.
 /// - Both `id` and `name` are ** path parameters ** (e.g., `/api/query_user/123/alice`).
-pub fn routes() -> Router {
+pub(crate) fn routes() -> Router {
     Router::new()
         .route("/create_user", post(user::create_user))
         .route("/query_user/{id}/{name}", get(user::get_user))
