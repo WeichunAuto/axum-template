@@ -1,29 +1,45 @@
-# This is A Axum WEB Project Base Structure Template
+# Axum Web Project Template
 
-## Overview
+This repository provides a **basic project structure template** for building web applications using [Axum](https://github.com/tokio-rs/axum).
+It is suitable for quickly bootstrapping new projects while maintaining flexibility for future growth.
 
-This repository provides a foundational template for building web applications with Axum.
-It is designed to accelerate project setup by including commonly used developer tools and configuration, ensuring consistent workflows and improved developer productivity.
+---
+
+## How to use ?
+
+```bash
+cargo generate https://github.com/WeichunAuto/axum-template
+```
 
 ## Prerequisites
 
 Before using this template, please ensure that:
 
-- You have a basic understanding of Rust and its ecosystem.
-- The Rust toolchain (via rustup
-  ) is properly installed and available in your environment.
+- You have a **basic understanding of Rust**.
+- The **Rust toolchain** is properly installed. If not, install it via [rustup](https://rustup.rs/).
+- Git is installed and configured.
+- [`cargo-generate`](https://github.com/cargo-generate/cargo-generate) installed:
 
-## Install pre-commit
+```bash
+cargo install cargo-generate
+```
+
+---
+
+## Development Tools Required
+
+The template is using the following tools:
+
+### 1. Install [pre-commit](https://pre-commit.com/)
 
 pre-commit is a code checking tool that runs checks before you commit your code.
 
 ```bash
 pipx install pre-commit
+pre-commit install
 ```
 
-After installation, run pre-commit install to enable it.
-
-## Install typos
+### Install [typos](https://github.com/crate-ci/typos)
 
 typos is a spell-checking tool.
 
@@ -31,7 +47,7 @@ typos is a spell-checking tool.
 cargo install typos-cli
 ```
 
-## Install git cliff
+### Install [git cliff](https://github.com/orhun/git-cliff)
 
 git cliff is a tool for generating changelogs.
 
@@ -39,7 +55,7 @@ git cliff is a tool for generating changelogs.
 cargo install git-cliff
 ```
 
-## Install cargo watch
+### Install [cargo watch](https://github.com/watchexec/cargo-watch)
 
 The purpose of cargo watch is to monitor changes in your project’s source files and automatically execute the specified cargo command.
 Whenever you save a file, it will automatically recompile, run, or test the project.
@@ -48,7 +64,12 @@ Whenever you save a file, it will automatically recompile, run, or test the proj
 cargo install cargo-watch
 ```
 
-After installation:
+Usage:
 
-- Run: cargo watch -x 'run' to start the project.
-- Run: APP_HOST=127.0.0.1 APP_PORT=8080 cargo watch -x 'run' to start the project with environment variables.
+```bash
+# Start the project with auto-reload
+cargo watch -x 'run'
+
+# Start with custom host & port
+APP_HOST=127.0.0.1 APP_PORT=8080 cargo watch -x 'run'
+```

@@ -1,0 +1,17 @@
+### Test index route
+GET http://127.0.0.1:3000/
+
+### Test query route
+GET http://127.0.0.1:3000/api/query_user/50/Alice
+
+### Test error route
+GET http://127.0.0.1:3000/api/query_user_error/10/Bob
+
+### Test create route
+POST http://127.0.0.1:3000/api/create_user
+Content-Type: application/json
+
+{
+    "name": "Bob",
+    "password": "a12345"
+}
