@@ -1,40 +1,54 @@
-# 这是 Booby 的 Axum WEB 项目的基础结构模板
+# This is A Axum WEB Project Base Structure Template
 
-## 安装 pre-commit
+## Overview
 
-pre-commit 是一个代码检查工具，可以在提交代码前进行代码检查。
+This repository provides a foundational template for building web applications with Axum.
+It is designed to accelerate project setup by including commonly used developer tools and configuration, ensuring consistent workflows and improved developer productivity.
+
+## Prerequisites
+
+Before using this template, please ensure that:
+
+- You have a basic understanding of Rust and its ecosystem.
+- The Rust toolchain (via rustup
+  ) is properly installed and available in your environment.
+
+## Install pre-commit
+
+pre-commit is a code checking tool that runs checks before you commit your code.
 
 ```bash
 pipx install pre-commit
 ```
 
-安装成功后运行 `pre-commit install` 即可。
+After installation, run pre-commit install to enable it.
 
-## 安装 typos
+## Install typos
 
-typos 是一个拼写检查工具。
+typos is a spell-checking tool.
 
 ```bash
 cargo install typos-cli
 ```
 
-## 安装 git cliff
+## Install git cliff
 
-git cliff 是一个生成 changelog 的工具。
+git cliff is a tool for generating changelogs.
 
 ```bash
 cargo install git-cliff
 ```
 
-## 安装 cargo watch
+## Install cargo watch
 
-cargo watch 的作用就是 监听你的项目源码文件变化，并自动执行指定的 cargo 命令。只要保存文件，它就会自动帮你重新编译、运行或测试。
+The purpose of cargo watch is to monitor changes in your project’s source files and automatically execute the specified cargo command.
+Whenever you save a file, it will automatically recompile, run, or test the project.
 
 ```bash
 cargo install cargo-watch
 ```
 
-安装成功后：
+After installation:
 
-- 执行：cargo watch -x 'run' 启动项目
-- 执行：APP_HOST = 127.0.0.1 APP_PORT = 8080 cargo watch -x 'run' 通过设置环境变量来启动项目
+- Run: cargo watch -x 'run' to start the project.
+- Run: APP_HOST=127.0.0.1 APP_PORT=8080 cargo watch -x 'run' to start the project with environment variables.
