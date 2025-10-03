@@ -1,3 +1,2 @@
 [template]
-# 忽略对 cliff.toml 的替换
 # exclude = ["cliff.toml"]
