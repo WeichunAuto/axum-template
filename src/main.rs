@@ -1,18 +1,20 @@
-use std::env;
-
-use axum_template::routes;
+use axum_template::{config, logger, routes};
 
 #[tokio::main]
 async fn main() {
-    // Read environment variable APP_HOST and APP_PORT. If not set, fallback to "127.0.0.1 and 3000".
-    let host = env::var("APP_HOST").unwrap_or_else(|_| "127.0.0.1".to_string());
-    let port = env::var("APP_PORT").unwrap_or_else(|_| "3000".to_string());
+    logger::init();
+
+    let app_config = config::AppConfig::get_config();
 
     let app = routes::create_routes();
+    let addr = format!(
+        "{}:{}",
+        app_config.server.get_host(),
+        app_config.server.get_port()
+    );
 
-    let listener = tokio::net::TcpListener::bind(format!("{host}:{port}"))
-        .await
-        .unwrap();
+    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
+    tracing::info!("Listening on {}", addr);
     axum::serve(listener, app).await.unwrap();
 }
 

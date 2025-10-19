@@ -71,5 +71,5 @@ Usage:
 cargo watch -x 'run'
 
 # Start with custom host & port
-APP_HOST=127.0.0.1 APP_PORT=8080 cargo watch -x 'run'
+APP_SERVER_HOST=127.0.0.1 APP_SERVER_PORT=8080 cargo watch -x 'run'
 ```
