@@ -10,12 +10,6 @@ pub mod server;
 /// Lazily initialized global application configuration.
 ///
 /// This static instance will be initialized only once on first access.
-///
-/// # Example
-/// ```rust
-/// let config = AppConfig::get_config();
-/// println!("Server host: {}", config.server.host);
-/// ```
 static APP_CONFIG: LazyLock<AppConfig> =
     LazyLock::new(|| AppConfig::load().expect("Failed to load config"));
 
