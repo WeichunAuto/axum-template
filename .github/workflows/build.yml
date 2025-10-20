@@ -30,7 +30,7 @@ jobs:
 
       # Run tests (using nextest if available)
       - name: Run tests
-        run: cargo nextest run --all-features
+        run: cargo test --all-features
 
       # Install git-cliff CLI to generate changelog
       - name: Install git-cliff
