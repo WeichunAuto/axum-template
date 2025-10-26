@@ -1,3 +1,4 @@
+use crate::config::database::DbConfig;
 use crate::config::server::ServerConfig;
 use anyhow::{Context, Result};
 use config::{Config, FileFormat};
@@ -7,6 +8,8 @@ use std::sync::LazyLock;
 
 pub mod server;
 
+pub mod database;
+
 /// Lazily initialized global application configuration.
 ///
 /// This static instance will be initialized only once on first access.
@@ -15,7 +18,8 @@ static APP_CONFIG: LazyLock<AppConfig> =
 
 #[derive(Debug, Deserialize)]
 pub struct AppConfig {
-    pub server: ServerConfig,
+    server: ServerConfig,
+    database: DbConfig,
 }
 impl AppConfig {
     /// Loads configuration from multiple sources:
@@ -54,8 +58,16 @@ impl AppConfig {
     }
 
     /// Returns a global, lazily initialized reference to the application configuration.
-    pub fn get_config() -> &'static Self {
+    pub fn get() -> &'static Self {
         &APP_CONFIG
+    }
+
+    pub fn server(&self) -> &ServerConfig {
+        &self.server
+    }
+
+    pub fn database(&self) -> &DbConfig {
+        &self.database
     }
 }
 
@@ -65,7 +77,7 @@ mod tests {
 
     #[test]
     fn test_config() {
-        let config = AppConfig::get_config();
+        let config = AppConfig::get();
         println!("{:?}", config);
     }
 }

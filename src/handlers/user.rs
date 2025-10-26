@@ -1,58 +1,40 @@
-use axum::{
-    extract::{Path, Query},
-    http::StatusCode,
-    Json,
-};
-use serde::Deserialize;
+use crate::entity::prelude::*;
+use axum::extract::State;
+use axum::extract::{Path, Query};
+use sea_orm::{prelude::*, Condition};
 
-use crate::models::user::{User, UserResponse};
+use crate::application::AppState;
+use crate::entity::users;
+use crate::entity::users::Model;
+use crate::response::ApiResponse;
+use serde::Deserialize;
 
 #[derive(Deserialize)]
 pub(crate) struct UserQuery {
     pub active: Option<bool>,
 }
 
-/// Handler for creating a new user.
-///
-/// - Expects a JSON body matching the `User` struct.
-/// - Returns a `UserResponse` wrapped in JSON.
-pub(crate) async fn create_user(Json(user): Json<User>) -> Json<UserResponse> {
-    let new_user = UserResponse {
-        id: 1,
-        name: format!("{}{}", user.name, user.password.len()),
-        active: true,
-    };
-    Json(new_user)
-}
-
-/// Handler for fetching a user by `id` and `name`.
-///
-/// Example request: `http://127.0.0.1:8099/api/query_user/44/bobby?active=true`
-pub(crate) async fn get_user(
+#[tracing::instrument(name="get_users", skip(state, params), fields(id = %id, name = %name))]
+pub(crate) async fn get_users(
+    State(state): State<AppState>,
     Path((id, name)): Path<(u32, String)>,
     Query(params): Query<UserQuery>,
-) -> Json<UserResponse> {
-    let user = UserResponse {
-        id,
-        name,
-        active: params.active.unwrap_or(false), // If not provided, defaults to `false`.
-    };
-    Json(user)
-}
+) -> ApiResponse<Option<Model>> {
+    tracing::info!("start querying users...");
+    let db = state.db();
 
-/// Handler for demonstrating error responses.
-pub(crate) async fn get_error(
-    Path((id, name)): Path<(u32, String)>,
-) -> Result<Json<UserResponse>, StatusCode> {
-    if id < 10 {
-        Err(StatusCode::BAD_REQUEST)
-    } else if id < 20 {
-        Err(StatusCode::NOT_FOUND)
-    } else {
-        Ok(Json(UserResponse {
-            id,
-            name,
-            active: false,
-        }))
-    }
+    let user = Users::find()
+        .filter(
+            Condition::all()
+                .add(users::Column::Id.eq(id))
+                .add(users::Column::Fullname.eq(name)),
+        )
+        // .all(&db)
+        .one(db)
+        .await
+        .unwrap();
+
+    tracing::info!("params: {:?}", params.active);
+
+    ApiResponse::success("success", Some(user))
 }

@@ -1,21 +1,7 @@
-use axum_template::{config, logger, routes};
-
+use axum_template::{api, application};
 #[tokio::main]
-async fn main() {
-    logger::init();
-
-    let app_config = config::AppConfig::get_config();
-
-    let app = routes::create_routes();
-    let addr = format!(
-        "{}:{}",
-        app_config.server.get_host(),
-        app_config.server.get_port()
-    );
-
-    let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
-    tracing::info!("Listening on {}", addr);
-    axum::serve(listener, app).await.unwrap();
+async fn main() -> anyhow::Result<()> {
+    application::run(api::build_routes().await).await
 }
 
 #[cfg(test)]

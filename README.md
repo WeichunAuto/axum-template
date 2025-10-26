@@ -30,7 +30,7 @@ cargo install cargo-generate
 
 The template is using the following tools:
 
-### 1. Install [pre-commit](https://pre-commit.com/)
+### Install [pre-commit](https://pre-commit.com/)
 
 pre-commit is a code checking tool that runs checks before you commit your code.
 
@@ -62,6 +62,12 @@ Whenever you save a file, it will automatically recompile, run, or test the proj
 
 ```bash
 cargo install cargo-watch
+```
+
+### Install [sea-orm](https://www.sea-ql.org/SeaORM/docs)
+SeaORM is a relational ORM to help you build web services in Rust
+```bash
+cargo install sea-orm-cli@^2.0.0-rc
 ```
 
 Usage:
