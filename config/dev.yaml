@@ -7,5 +7,5 @@ database:
   port: 5432
   user: "bobby"
   password: ""
-  db_name: "im_web"
+  db_name: "axum_template"
   schema: "public"
