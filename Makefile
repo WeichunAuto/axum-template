@@ -255,6 +255,8 @@ db-migrate:
 			echo "$(GREEN)$(CHECKMARK) sqlx migration completed$(NC)"; \
 			\
 			if command -v sea-orm-cli > /dev/null 2>&1; then \
+			  	echo "$(YELLOW)$(ARROW) Creating entity directory...$(NC)"; \
+              	mkdir -p ./src/entity; \
 				echo "$(YELLOW)$(ARROW) Generating SeaORM entities...$(NC)"; \
 				sea-orm-cli generate entity -s public --with-serde both --model-extra-attributes 'serde(rename_all="camelCase")' --date-time-crate chrono -o ./src/entity; \
 				echo "$(GREEN)$(CHECKMARK) SeaORM entity generation completed$(NC)"; \
