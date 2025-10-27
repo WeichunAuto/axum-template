@@ -1,9 +1,9 @@
 
 -- create user table
 CREATE TABLE IF NOT EXISTS users (
-                                     id BIGSERIAL PRIMARY KEY,
-                                     fullname VARCHAR(64) NOT NULL,
-    email VARCHAR(64) NOT NULL,
+    id BIGSERIAL PRIMARY KEY,
+    fullname VARCHAR(64) NOT NULL,
+    email VARCHAR(64) NOT NULL UNIQUE,
     password_hash VARCHAR(97) NOT NULL,
     create_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
     );
@@ -14,8 +14,8 @@ INSERT INTO users (id, fullname, email, password_hash) VALUES (0, 'Super', 'supe
 -- Add migration script here
 -- workspace for users
 CREATE TABLE IF NOT EXISTS workspace (
-                                         id BIGSERIAL PRIMARY KEY,
-                                         name VARCHAR(32) NOT NULL UNIQUE,
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(32) NOT NULL UNIQUE,
     owner_id BIGINT NOT NULL REFERENCES users(id),
     create_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
     );

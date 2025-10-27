@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="axum_template@localhost" uuid="7aa1a08a-82a1-48fb-82da-c8e3bf5843cd">
+    <data-source source="LOCAL" name="axum_template@localhost [2]" uuid="364d9071-2914-4f57-9170-d66fefe7de1f">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
