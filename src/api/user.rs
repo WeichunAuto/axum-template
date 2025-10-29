@@ -1,6 +1,10 @@
 use crate::application::AppState;
 use crate::handlers::user;
-use axum::{routing::get, Router};
+use axum::routing::{delete, patch};
+use axum::{
+    routing::{get, post},
+    Router,
+};
 
 /// Define user-related api for the application.
 ///
@@ -11,7 +15,11 @@ use axum::{routing::get, Router};
 // #[axum::debug_handler]
 pub(crate) fn routes() -> Router<AppState> {
     Router::new()
-        // .route("/create_user", post(user::create_user))
-        .route("/query_user/{id}/{name}", get(user::get_users))
-    // .route("/query_user_error/{id}/{name}", get(user::get_error))
+        .route("/create_user", post(user::create))
+        .route("/get_user", get(user::query))
+        .route(
+            "/update_user_ws_by_id/{id}/{ws_id}",
+            patch(user::update_ws_by_id),
+        )
+        .route("/delete_user_by_id/{id}", delete(user::delete_by_id))
 }

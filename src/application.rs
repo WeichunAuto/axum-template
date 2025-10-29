@@ -12,7 +12,7 @@ use tracing::Span;
 
 #[derive(Clone)]
 pub struct AppState {
-    db: DatabaseConnection,
+    pub db: DatabaseConnection,
 }
 struct Server {
     config: &'static AppConfig,

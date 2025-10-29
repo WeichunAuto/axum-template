@@ -1,6 +1,7 @@
 use crate::error::ApiError;
 
 pub(crate) mod user;
+pub(crate) mod workspace;
 
 /// Index handler
 ///
