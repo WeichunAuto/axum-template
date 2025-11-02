@@ -6,13 +6,7 @@ use axum::{routing::get, Router};
 pub(crate) mod user;
 mod workspace;
 
-/// Create and configure application api.
-///
-/// - Registers `/` as the root route.
-/// - Uses `.nest("/api", user::api())` to mount all api from the `user` module
-///   under the `/api` path.
-///   For example, if `user::api()` defines `/login`, the full path will be `/api/login`.
-///   Sets a `fallback` handler for unmatched api.
+/// Creates and configures the application API routes.
 pub async fn build_routes() -> Router<AppState> {
     Router::new()
         .route("/", get(handlers::index))

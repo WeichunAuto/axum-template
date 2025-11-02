@@ -1,4 +1,4 @@
-use crate::config::database::DbConfig;
+pub(crate) use crate::config::database::DbConfig;
 use crate::config::server::ServerConfig;
 use anyhow::{Context, Result};
 use config::{Config, FileFormat};
@@ -22,18 +22,20 @@ pub struct AppConfig {
     database: DbConfig,
 }
 impl AppConfig {
-    /// Loads configuration from multiple sources:
+    /// Loads configuration from multiple sources with the following priority:
     ///
-    /// 1. **TOML file:** `config/{RUN_ENV}.toml`
-    ///    - Determined by the `RUN_ENV` environment variable (default: `"dev"`).
+    /// 1. **YAML file:** `config/{RUN_ENV}.yaml`
+    ///    - Environment determined by `RUN_ENV` (default: `"dev"`)
+    ///    - Example: `config/dev.yaml` for development
+    ///    - Example: `config/prod.yaml` for production
     /// 2. **Environment variables:** prefixed with `APP_`
-    ///    - Example: `APP_SERVER_PORT=9090`
-    ///
-    /// Environment variables have higher priority and override file values.
+    ///    - Override file values with higher priority
+    ///    - Example: `APP_SERVER_PORT=9090` overrides `server.port` in YAML
+    ///    - Nested keys use underscore separator: `APP_DATABASE_HOST`
     ///
     /// # Returns
     /// - `Ok(AppConfig)` on success
-    /// - `Err(AppError)` with context if loading or deserialization fails
+    /// - `Err(anyhow::Error)` with context if loading or deserialization fails
     pub fn load() -> Result<Self> {
         // Determine the runtime environment, defaulting to "dev"
         let run_env = std::env::var("RUN_ENV").unwrap_or_else(|_| "dev".into());
@@ -62,10 +64,12 @@ impl AppConfig {
         &APP_CONFIG
     }
 
+    /// Returns the server configuration.
     pub fn server(&self) -> &ServerConfig {
         &self.server
     }
 
+    /// Returns the database configuration.
     pub fn database(&self) -> &DbConfig {
         &self.database
     }

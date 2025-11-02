@@ -10,46 +10,77 @@ use std::time::Duration;
 use tower_http::trace::{OnResponse, TraceLayer};
 use tracing::Span;
 
+/// Application state shared across all request handlers.
+///
+/// Contains database connection pool and other shared resources.
 #[derive(Clone)]
 pub struct AppState {
     pub db: DatabaseConnection,
 }
+
+/// Server instance responsible for starting and configuring the HTTP server.
 struct Server {
     config: &'static AppConfig,
 }
 
+/// Custom tracing implementation for response latency logging.
 #[derive(Debug, Clone)]
 struct LatencyOnResponse;
 
 struct Latency(Duration);
 
 impl AppState {
+    /// Creates a new application state with the given database connection.
     fn new(db: DatabaseConnection) -> Self {
         Self { db }
     }
+
+    /// Returns a reference to the database connection.
     pub fn db(&self) -> &DatabaseConnection {
         &self.db
     }
 }
 
+/// Starts the application server with the provided router.
+///
+/// # Process
+/// 1. Initializes logging system
+/// 2. Establishes database connection
+/// 3. Creates application state
+/// 4. Starts HTTP server with configured routes
+///
+/// # Arguments
+/// * `router` - The application router containing all route definitions
+///
+/// # Returns
+/// * `anyhow::Result<()>` - Result indicating server startup success or failure
 pub async fn run(router: Router<AppState>) -> anyhow::Result<()> {
+    // Initialize logging and tracing
     logger::init();
     tracing::info!("Starting the application server......");
 
+    // Initialize database connection
     let db_connection = database::init().await?;
 
+    // Create application state with database connection
     let app_state = AppState::new(db_connection);
 
+    // Create server instance and start
     let server = Server::new(AppConfig::get());
-
     server.start(app_state, router).await
 }
 
 impl Server {
+    /// Creates a new server instance with the given configuration.
     fn new(config: &'static AppConfig) -> Self {
         Self { config }
     }
 
+    /// Starts the HTTP server and begins listening for requests.
+    ///
+    /// # Arguments
+    /// * `state` - Application state to be shared with handlers
+    /// * `router` - Router containing the route definitions
     async fn start(&self, state: AppState, router: Router<AppState>) -> anyhow::Result<()> {
         let server_config = self.config.server();
         tracing::info!("Server config: {:?}", server_config);
@@ -59,7 +90,7 @@ impl Server {
         let addr = format!("{}:{}", server_config.get_host(), server_config.get_port());
 
         let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
-        tracing::info!("Listening on {}", addr);
+        tracing::info!("The Application is listening on: {}", addr);
         axum::serve(
             listener,
             routes.into_make_service_with_connect_info::<SocketAddr>(),
@@ -69,12 +100,13 @@ impl Server {
         Ok(())
     }
 
+    /// Configures routes with tracing middleware and application state.
     fn create_routes(&self, state: AppState, router: Router<AppState>) -> Router {
         let tracing = TraceLayer::new_for_http()
             .make_span_with(|request: &Request| {
                 let method = request.method();
                 let path = request.uri().path();
-                let id = xid::new();
+                let id = xid::new(); // Generate unique request ID
                 tracing::info_span!("Api Request: ", id = %id, method = %method, path = %path)
             })
             .on_request(())
@@ -90,7 +122,7 @@ impl<B> OnResponse<B> for LatencyOnResponse {
         tracing::info!(
             latency = %Latency(latency),
             status = %response.status().as_u16(),
-            "finished processing request"
+            "finished processing request."
         )
     }
 }

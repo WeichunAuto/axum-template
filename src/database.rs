@@ -7,14 +7,7 @@ use std::time::Duration;
 
 pub async fn init() -> anyhow::Result<DatabaseConnection> {
     let db_config = config::AppConfig::get().database();
-    let mut options = ConnectOptions::new(format!(
-        "postgres://{}:{}@{}:{}/{}",
-        db_config.user(),
-        db_config.password(),
-        db_config.host(),
-        db_config.port(),
-        db_config.db_name(),
-    ));
+    let mut options = ConnectOptions::new(db_config.database_url());
 
     let num_cpus = num_cpus::get() as u32;
     options

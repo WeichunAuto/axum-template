@@ -1,81 +1,88 @@
 # Axum Web Project Template
 
-This repository provides a **basic project structure template** for building web applications using [Axum](https://github.com/tokio-rs/axum).
-It is suitable for quickly bootstrapping new projects while maintaining flexibility for future growth.
+This repository aims to provide a **production-ready project template** for building robust web applications with Rust and the Axum framework. It encapsulates industry best practices and common development patterns to accelerate your project setup while ensuring maintainability and scalability.
+
+## 🎯 What can you get?
+
+- **🚀 Best Practices Structure**: Well-organized project architecture following Rust and Axum conventions, providing a solid foundation for growing applications.
+
+- **📦 Unified API Response Format**: Pre-defined response structures that standardize API output, ensuring consistency across all endpoints.
+
+- **🔍 Integrated Tracing and Logging**: Built-in tracing middleware with automatic Request ID generation for every incoming request, enabling efficient log correlation and rapid issue diagnosis.
+
+- **🗄️ SeaORM Integration**: Seamlessly integrated with SeaORM for type-safe database operations, basic examples covering GET, POST, PATCH, and DELETE requests with path, query parameters, and payload body.
+
+- **⚙️ Dev and Prod separated Configuration**: Support for separate development and production environment configurations.
 
 ---
 
 ## How to use ?
+This is an **SQL-first Axum WEB project template** that provides a solid foundation for building database-driven web applications. The template includes comprehensive CRUD operations for a user management example with associated workspaces, demonstrating real-world data relationships and API patterns.
+
+### 1. Generate a new project from this template:
+```bash
+cargo generate https://github.com/WeichunAuto/axum-template --name your-project-name
+```
+### 2. Design Your Database Schema
+Define your database structure using SQL-first approach in the `sql/init.sql` file:
+
+### 3. Verify Development Environment
+Check if all required development tools are properly installed:
 
 ```bash
-cargo generate https://github.com/WeichunAuto/axum-template
+make version
+```
+This command displays the version information for all essential tools, any missing tools will be clearly marked, allowing you to install them before proceeding.
+
+### 4. Install all required development tools.
+
+```bash
+make install
 ```
 
-## Prerequisites
+### 5. Set up and build the project
+**First, configure your database credentials:**
+1. Edit `config/dev.yaml or config/prod.yaml` if you are in the production environment and update the database username:
 
-Before using this template, please ensure that:
-
-- You have a **basic understanding of Rust**.
-- The **Rust toolchain** is properly installed. If not, install it via [rustup](https://rustup.rs/).
-- Git is installed and configured.
-- [`cargo-generate`](https://github.com/cargo-generate/cargo-generate) installed:
-
-```bash
-cargo install cargo-generate
+```yaml
+database:
+  user: "your_user_name"
+  password: "your_password"
+```
+2. Update .env file with your database connection:
+```env
+DATABASE_URL=postgres://your_username:your_password@localhost:5432/axum_template
 ```
 
----
-
-## Development Tools Required
-
-The template is using the following tools:
-
-### Install [pre-commit](https://pre-commit.com/)
-
-pre-commit is a code checking tool that runs checks before you commit your code.
+**Then run the setup command:**
 
 ```bash
-pipx install pre-commit
-pre-commit install
+make setup
 ```
+This command automates the complete project initialization process:
 
-### Install [typos](https://github.com/crate-ci/typos)
+- **Database Migration:** Automatically generates and executes migration scripts based on your sql/init.sql schema definition
 
-typos is a spell-checking tool.
+- **Database Creation:** Creates a PostgreSQL database named axum_template
 
+- **Sample Data:** If you use the default *./sql/init.sql* without modifications, the database will be populated with: users table with sample user records, workspaces table with sample workspace data. The realistic seed data for immediate development and testing
+
+- **Entity Generation:** Automatically generates SeaORM entities from your database schema
+
+- **Project Build:** Compiles the entire project with all dependencies
+
+### 6. Start the project
 ```bash
-cargo install typos-cli
+make dev
 ```
+This command starts the server with automatic hot-reload; any code changes will trigger an immediate restart, allowing you to see updates in real-time without manual intervention.
 
-### Install [git cliff](https://github.com/orhun/git-cliff)
-
-git cliff is a tool for generating changelogs.
-
-```bash
-cargo install git-cliff
-```
-
-### Install [cargo watch](https://github.com/watchexec/cargo-watch)
-
-The purpose of cargo watch is to monitor changes in your project’s source files and automatically execute the specified cargo command.
-Whenever you save a file, it will automatically recompile, run, or test the project.
+### Alternative startup methods:
 
 ```bash
-cargo install cargo-watch
-```
+# Standard production build
+cargo run
 
-### Install [sea-orm](https://www.sea-ql.org/SeaORM/docs)
-SeaORM is a relational ORM to help you build web services in Rust
-```bash
-cargo install sea-orm-cli@^2.0.0-rc
-```
-
-Usage:
-
-```bash
-# Start the project with auto-reload
-cargo watch -x 'run'
-
-# Start with custom host & port
-APP_SERVER_HOST=127.0.0.1 APP_SERVER_PORT=8080 cargo watch -x 'run'
+# Manual watch mode (equivalent to make dev)
+cargo watch -x run
 ```
