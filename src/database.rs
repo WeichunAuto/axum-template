@@ -6,23 +6,25 @@ use std::cmp::max;
 use std::time::Duration;
 
 pub async fn init() -> anyhow::Result<DatabaseConnection> {
-    let db_config = config::AppConfig::get().database();
+    let app_config = config::AppConfig::get();
+    let db_config = app_config.database();
+    let pool_config = app_config.pool();
     let mut options = ConnectOptions::new(db_config.database_url());
 
     let num_cpus = num_cpus::get() as u32;
     options
-        .min_connections(max(num_cpus * 4, 10))
-        .max_connections(max(num_cpus * 8, 20))
-        .connect_timeout(Duration::from_secs(10))
-        .acquire_timeout(Duration::from_secs(20)) // read timeout
-        .idle_timeout(Duration::from_secs(300))
-        .max_lifetime(Duration::from_secs(3600 * 24))
+        .min_connections(max(num_cpus * 4, pool_config.min_connections()))
+        .max_connections(max(num_cpus * 8, pool_config.max_connections()))
+        .connect_timeout(Duration::from_secs(pool_config.connect_timeout()))
+        .acquire_timeout(Duration::from_secs(pool_config.read_timeout())) // read timeout
+        .idle_timeout(Duration::from_secs(pool_config.idle_timeout()))
+        .max_lifetime(Duration::from_secs(3600 * pool_config.max_lifetime()))
         .sqlx_logging(false)
         .set_schema_search_path(db_config.schema());
 
     let db_connection = Database::connect(options).await?;
     db_connection.ping().await?;
-    tracing::info!("Database connection established");
+    tracing::info!("Database connection through pool is established");
     print_db_version(&db_connection).await?;
 
     Ok(db_connection)

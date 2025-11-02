@@ -1,6 +1,6 @@
 server:
   host: "127.0.0.1"
-  port: 3008
+  port: 3005
 
 database:
   host: "127.0.0.1"
@@ -9,3 +9,11 @@ database:
   password: ""
   db_name: "axum_template"
   schema: "public"
+
+pool:
+  min_connections: 10
+  max_connections: 20
+  connect_timeout: 10  # seconds
+  read_timeout: 20  # seconds
+  idle_timeout: 300  # seconds
+  max_lifetime: 24  # hours

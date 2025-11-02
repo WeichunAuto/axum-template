@@ -1,4 +1,5 @@
 pub(crate) use crate::config::database::DbConfig;
+use crate::config::database::DbPoolConfig;
 use crate::config::server::ServerConfig;
 use anyhow::{Context, Result};
 use config::{Config, FileFormat};
@@ -20,6 +21,7 @@ static APP_CONFIG: LazyLock<AppConfig> =
 pub struct AppConfig {
     server: ServerConfig,
     database: DbConfig,
+    pool: DbPoolConfig,
 }
 impl AppConfig {
     /// Loads configuration from multiple sources with the following priority:
@@ -72,6 +74,11 @@ impl AppConfig {
     /// Returns the database configuration.
     pub fn database(&self) -> &DbConfig {
         &self.database
+    }
+
+    /// Returns the database pool configuration.
+    pub fn pool(&self) -> &DbPoolConfig {
+        &self.pool
     }
 }
 

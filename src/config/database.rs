@@ -20,6 +20,34 @@ pub struct DbConfig {
     schema: Option<String>,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct DbPoolConfig {
+    /// Minimum number of connections to maintain in the pool.
+    ///
+    /// Default: `5`
+    min_connections: Option<u32>,
+    /// Maximum number of connections allowed in the pool.
+    ///
+    /// Default: `20`
+    max_connections: Option<u32>,
+    /// Maximum time to wait when establishing a new connection (seconds).
+    ///
+    /// Default: `10`
+    connect_timeout: Option<u64>,
+    /// Maximum time to wait for database query responses (seconds).
+    ///
+    /// Default: `20`
+    read_timeout: Option<u64>,
+    /// Maximum time a connection can remain idle in the pool before being closed (seconds).
+    ///
+    /// Default: `300` (5 minutes)
+    idle_timeout: Option<u64>,
+    /// Maximum lifetime of a connection in the pool (hours).
+    ///
+    /// Default: `24`
+    max_lifetime: Option<u64>,
+}
+
 impl DbConfig {
     /// Returns the database host with fallback to localhost.
     ///
@@ -75,5 +103,31 @@ impl DbConfig {
             self.port(),
             self.db_name()
         )
+    }
+}
+
+impl DbPoolConfig {
+    pub fn min_connections(&self) -> u32 {
+        self.min_connections.unwrap_or(5)
+    }
+
+    pub fn max_connections(&self) -> u32 {
+        self.max_connections.unwrap_or(20)
+    }
+
+    pub fn connect_timeout(&self) -> u64 {
+        self.connect_timeout.unwrap_or(10)
+    }
+
+    pub fn read_timeout(&self) -> u64 {
+        self.read_timeout.unwrap_or(20)
+    }
+
+    pub fn idle_timeout(&self) -> u64 {
+        self.idle_timeout.unwrap_or(300)
+    }
+
+    pub fn max_lifetime(&self) -> u64 {
+        self.max_lifetime.unwrap_or(24)
     }
 }
