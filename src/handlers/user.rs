@@ -2,10 +2,11 @@ use crate::entity::prelude::*;
 use axum::extract::State;
 use axum::extract::{Path, Query};
 use axum::Json;
-use sea_orm::{prelude::*, Condition, Set};
+use sea_orm::{prelude::*, Condition, QueryOrder, Set};
 use std::fmt::{Display, Formatter};
 
 use crate::application::AppState;
+use crate::common::{Page, Pagination};
 use crate::entity::users;
 use crate::entity::users::{ActiveModel, Model};
 use crate::response::ApiResponse;
@@ -21,8 +22,12 @@ pub(crate) struct CreateUserRequest {
 
 #[derive(Debug, Deserialize)]
 pub(crate) struct UserQuery {
+    pub keyword: Option<String>,
     pub id: Option<u64>,
     pub name: Option<String>,
+    #[serde(flatten)]
+    //将嵌套的 `Pagination` 结构体字段扁平化到当前结构体中，避免JSON中的嵌套层级。
+    pub pagination: Option<Pagination>,
 }
 
 /// delete user by id
@@ -134,9 +139,9 @@ pub(crate) async fn create(
     }
 }
 
-/// query user by id and name
-#[tracing::instrument(name="get_user", skip(state), fields(UserQuery = %params))]
-pub(crate) async fn query(
+/// query all users by id and name
+#[tracing::instrument(name="query_all_by_id_or_name", skip(state), fields(UserQuery = %params))]
+pub(crate) async fn query_all_by_id_or_name(
     State(state): State<AppState>,
     Query(params): Query<UserQuery>,
 ) -> ApiResponse<Vec<Model>> {
@@ -151,9 +156,66 @@ pub(crate) async fn query(
         conditions = conditions.add(users::Column::Fullname.eq(name));
     }
 
-    let users = Users::find().filter(conditions).all(db).await.unwrap();
+    let users = Users::find()
+        .filter(conditions)
+        .order_by_desc(users::Column::CreateAt)
+        .all(db)
+        .await
+        .unwrap();
     tracing::info!("query users results: {:?}", users);
     ApiResponse::success("success", Some(users))
+}
+
+pub async fn query_by_keyword(
+    State(AppState { db }): State<AppState>,
+    Query(params): Query<UserQuery>,
+) -> ApiResponse<Page<Model>> {
+    let mut query = Users::find();
+
+    if let Some(keyword) = params.keyword.as_ref() {
+        query = query.filter(
+            Condition::any()
+                .add(users::Column::Fullname.contains(keyword))
+                .add(users::Column::Email.contains(keyword)),
+        );
+    }
+    query = query.order_by_desc(users::Column::CreateAt);
+
+    let (pagination, items, total) = if let Some(pagination) = params.pagination {
+        let pagination = Pagination {
+            page: pagination.page,
+            size: pagination.size,
+        };
+        let paginator = query.paginate(&db, pagination.size);
+        let total = paginator.num_items().await.unwrap_or_else(|_| {
+            tracing::error!("error getting total");
+            0
+        });
+        let items = paginator
+            .fetch_page(pagination.page - 1)
+            .await
+            .unwrap_or_else(|_| {
+                tracing::error!("error getting total");
+                vec![]
+            });
+
+        (pagination, items, total)
+    } else {
+        let items = query.all(&db).await.unwrap_or_else(|_| {
+            tracing::error!("error getting total");
+            vec![]
+        });
+        let total = items.len() as u64;
+        let pagination = Pagination {
+            page: 1,
+            size: total,
+        };
+        (pagination, items, total)
+    };
+
+    let page = Page::from_pagination(&pagination, total, items);
+
+    ApiResponse::success("success", Some(page))
 }
 
 impl Display for CreateUserRequest {

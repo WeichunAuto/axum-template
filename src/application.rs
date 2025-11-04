@@ -1,12 +1,17 @@
 use crate::config::AppConfig;
 use crate::{database, logger};
-use axum::extract::Request;
+use axum::extract::{DefaultBodyLimit, Request};
 use axum::http::Response;
 use axum::Router;
+use bytesize::ByteSize;
 use sea_orm::DatabaseConnection;
 use std::fmt::{Display, Formatter};
 use std::net::SocketAddr;
 use std::time::Duration;
+use tower_http::cors;
+use tower_http::cors::{AllowMethods, CorsLayer};
+use tower_http::normalize_path::NormalizePathLayer;
+use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::{OnResponse, TraceLayer};
 use tracing::Span;
 
@@ -102,6 +107,28 @@ impl Server {
 
     /// Configures routes with tracing middleware and application state.
     fn create_routes(&self, state: AppState, router: Router<AppState>) -> Router {
+        // request timeout, default 60s
+        let timeout = TimeoutLayer::new(Duration::from_secs(60));
+
+        let body_limit = DefaultBodyLimit::max(
+            // body size limit 10MB
+            ByteSize::mib(10).as_u64() as usize,
+        );
+
+        let cors = CorsLayer::new()
+            .allow_origin(cors::Any)
+            .allow_methods(AllowMethods::list(vec![
+                http::Method::GET,
+                http::Method::POST,
+                http::Method::PUT,
+                http::Method::DELETE,
+                http::Method::PATCH,
+                http::Method::OPTIONS,
+            ]))
+            .allow_headers(cors::Any)
+            .allow_credentials(false)
+            .max_age(Duration::from_secs(3600));
+
         let tracing = TraceLayer::new_for_http()
             .make_span_with(|request: &Request| {
                 let method = request.method();
@@ -113,7 +140,17 @@ impl Server {
             .on_failure(())
             .on_response(LatencyOnResponse);
 
-        Router::new().merge(router).layer(tracing).with_state(state)
+        //  remove trailing slashes from request paths.
+        let normalize_path = NormalizePathLayer::trim_trailing_slash();
+
+        Router::new()
+            .merge(router)
+            .layer(timeout)
+            .layer(body_limit)
+            .layer(tracing)
+            .layer(cors)
+            .layer(normalize_path)
+            .with_state(state)
     }
 }
 

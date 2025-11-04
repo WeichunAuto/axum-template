@@ -10,7 +10,8 @@ use axum::{
 pub(crate) fn routes() -> Router<AppState> {
     Router::new()
         .route("/create_user", post(user::create))
-        .route("/get_user", get(user::query))
+        .route("/get_user", get(user::query_all_by_id_or_name))
+        .route("/query_by_keyword", get(user::query_by_keyword))
         .route(
             "/update_user_ws_by_id/{id}/{ws_id}",
             patch(user::update_ws_by_id),

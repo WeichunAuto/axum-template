@@ -7,6 +7,9 @@ GET http://127.0.0.1:3005/
 ### Test query route
 GET {{baseUrl}}/get_user?name=Bobby
 
+### Test query with pagination
+GET {{baseUrl}}/query_by_keyword?keyword=bobby&page=1&size=3
+
 ### Test create user route
 POST {{baseUrl}}/create_user
 Content-Type: application/json

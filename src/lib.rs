@@ -2,6 +2,7 @@ use sea_orm::DatabaseConnection;
 
 pub mod api;
 pub mod application;
+pub mod common;
 pub mod config;
 pub mod database;
 pub mod entity;
