@@ -3,7 +3,7 @@ use crate::common::{Page, Pagination};
 use crate::entity::prelude::*;
 use crate::entity::users;
 use crate::entity::users::{ActiveModel, Model};
-use crate::request::{BQuery, BValid};
+use crate::request::BValidQuery;
 use crate::response::ApiResponse;
 use axum::extract::Path;
 use axum::extract::State;
@@ -146,7 +146,7 @@ pub(crate) async fn create(
 #[tracing::instrument(name="query_all_by_id_or_name", skip(state), fields(UserQuery = %params))]
 pub(crate) async fn query_all_by_id_or_name(
     State(state): State<AppState>,
-    BQuery(params): BQuery<UserQuery>,
+    BValidQuery(params): BValidQuery<UserQuery>,
 ) -> ApiResponse<Vec<Model>> {
     let db = state.db();
 
@@ -172,7 +172,7 @@ pub(crate) async fn query_all_by_id_or_name(
 // #[debug_handler]
 pub async fn query_by_keyword(
     State(AppState { db }): State<AppState>,
-    BValid(BQuery(params)): BValid<BQuery<UserQuery>>, // apply validator
+    BValidQuery(params): BValidQuery<UserQuery>, // apply validator
 ) -> ApiResponse<Page<Model>> {
     let mut query = Users::find();
 
