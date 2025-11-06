@@ -3,12 +3,12 @@ use crate::common::{Page, Pagination};
 use crate::entity::prelude::*;
 use crate::entity::users;
 use crate::entity::users::{ActiveModel, Model};
-use crate::request::BQuery;
+use crate::request::{BQuery, BValid};
 use crate::response::ApiResponse;
 use axum::extract::Path;
 use axum::extract::State;
 use axum::Json;
-use axum_valid::Valid;
+// use axum_valid::Valid;
 use sea_orm::{prelude::*, Condition, QueryOrder, Set};
 use serde::Deserialize;
 use std::fmt::{Display, Formatter};
@@ -172,7 +172,7 @@ pub(crate) async fn query_all_by_id_or_name(
 // #[debug_handler]
 pub async fn query_by_keyword(
     State(AppState { db }): State<AppState>,
-    Valid(BQuery(params)): Valid<BQuery<UserQuery>>, // apply validator
+    BValid(BQuery(params)): BValid<BQuery<UserQuery>>, // apply validator
 ) -> ApiResponse<Page<Model>> {
     let mut query = Users::find();
 

@@ -14,6 +14,10 @@ pub struct BPath<T>(pub T);
 #[from_request(via(axum::extract::Json), rejection(ApiError))]
 pub struct BJson<T>(pub T);
 
+#[derive(Debug, Clone, Copy, Default, FromRequestParts, FromRequest)]
+#[from_request(via(axum_valid::Valid), rejection(ApiError))]
+pub struct BValid<T>(pub T);
+
 impl<T> HasValidate for BQuery<T> {
     type Validate = T;
 

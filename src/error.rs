@@ -2,8 +2,7 @@ use crate::response::ApiResponse;
 use axum::extract::rejection::{JsonRejection, PathRejection, QueryRejection};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use validator::ValidationErrors;
-// use axum_extra::extract::QueryRejection;
+use axum_valid::ValidRejection;
 
 #[derive(Debug, thiserror::Error)]
 pub enum ApiError {
@@ -32,7 +31,7 @@ pub enum ApiError {
     JsonError(#[from] JsonRejection),
 
     #[error("Validation Error: {0}")]
-    ValidationError(#[from] ValidationErrors),
+    ValidationError(String),
 }
 
 impl ApiError {
@@ -55,5 +54,14 @@ impl IntoResponse for ApiError {
         let status_code = self.status_code();
         let body = axum::Json(ApiResponse::<()>::error(self.to_string()));
         (status_code, body).into_response()
+    }
+}
+
+impl From<ValidRejection<ApiError>> for ApiError {
+    fn from(value: ValidRejection<ApiError>) -> Self {
+        match value {
+            ValidRejection::Valid(errors) => ApiError::ValidationError(errors.to_string()),
+            ValidRejection::Inner(errors) => errors,
+        }
     }
 }
