@@ -9,6 +9,7 @@ pub mod entity;
 pub mod error;
 pub(crate) mod handlers;
 pub mod logger;
+pub mod request;
 pub mod response;
 
 /// initialize all settings for logger and database

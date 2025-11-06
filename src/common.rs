@@ -1,16 +1,23 @@
 use serde::{Deserialize, Deserializer, Serialize};
 use std::fmt::Display;
 use std::str::FromStr;
+use validator::Validate;
 
 const DEFAULT_PAGE_NUMBER: u64 = 1;
 const DEFAULT_PAGE_SIZE: u64 = 2;
-#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize, Validate)]
 pub struct Pagination {
+    #[validate(range(min = 1, message = "page number must be greater than 0"))]
     #[serde(
         default = "default_page_number",
         deserialize_with = "deserialize_number"
     )]
     pub page: u64,
+    #[validate(range(
+        min = 1,
+        max = 100,
+        message = "page size must be greater than 0 and less than 100"
+    ))]
     #[serde(default = "default_page_size", deserialize_with = "deserialize_number")]
     pub size: u64,
 }

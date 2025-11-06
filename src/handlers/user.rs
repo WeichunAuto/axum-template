@@ -1,16 +1,18 @@
-use crate::entity::prelude::*;
-use axum::extract::State;
-use axum::extract::{Path, Query};
-use axum::Json;
-use sea_orm::{prelude::*, Condition, QueryOrder, Set};
-use std::fmt::{Display, Formatter};
-
 use crate::application::AppState;
 use crate::common::{Page, Pagination};
+use crate::entity::prelude::*;
 use crate::entity::users;
 use crate::entity::users::{ActiveModel, Model};
+use crate::request::BQuery;
 use crate::response::ApiResponse;
+use axum::extract::Path;
+use axum::extract::State;
+use axum::Json;
+use axum_valid::Valid;
+use sea_orm::{prelude::*, Condition, QueryOrder, Set};
 use serde::Deserialize;
+use std::fmt::{Display, Formatter};
+use validator::Validate;
 
 #[derive(Deserialize)]
 pub(crate) struct CreateUserRequest {
@@ -20,13 +22,14 @@ pub(crate) struct CreateUserRequest {
     pub ws_id: u64,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Validate)]
 pub(crate) struct UserQuery {
     pub keyword: Option<String>,
     pub id: Option<u64>,
     pub name: Option<String>,
+    #[validate(nested)]
     #[serde(flatten)]
-    //将嵌套的 `Pagination` 结构体字段扁平化到当前结构体中，避免JSON中的嵌套层级。
+    // Flatten the nested Pagination struct fields into the current struct to avoid nested levels in JSON.
     pub pagination: Option<Pagination>,
 }
 
@@ -143,7 +146,7 @@ pub(crate) async fn create(
 #[tracing::instrument(name="query_all_by_id_or_name", skip(state), fields(UserQuery = %params))]
 pub(crate) async fn query_all_by_id_or_name(
     State(state): State<AppState>,
-    Query(params): Query<UserQuery>,
+    BQuery(params): BQuery<UserQuery>,
 ) -> ApiResponse<Vec<Model>> {
     let db = state.db();
 
@@ -166,9 +169,10 @@ pub(crate) async fn query_all_by_id_or_name(
     ApiResponse::success("success", Some(users))
 }
 
+// #[debug_handler]
 pub async fn query_by_keyword(
     State(AppState { db }): State<AppState>,
-    Query(params): Query<UserQuery>,
+    Valid(BQuery(params)): Valid<BQuery<UserQuery>>, // apply validator
 ) -> ApiResponse<Page<Model>> {
     let mut query = Users::find();
 
