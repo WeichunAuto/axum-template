@@ -15,10 +15,11 @@ POST {{baseUrl}}/create_user
 Content-Type: application/json
 
 {
-    "fullname": "Alice",
-    "email": "Alice@email.co",
-    "password": "a12345",
-    "ws_id": 0
+    "fullname": "Genlisdfadfadfasdfasdfadfasdfads",
+    "gender": "Male",
+    "email": "Genli@email",
+    "password_hash": "a12345",
+    "ws_id": 1
 }
 
 ### Test create workspace route

@@ -1,6 +1,7 @@
 use crate::application::AppState;
 use crate::common::{Page, Pagination};
 use crate::entity::prelude::*;
+use crate::entity::sea_orm_active_enums::Gender;
 use crate::entity::users;
 use crate::entity::users::{ActiveModel, Model};
 use crate::request::BValidQuery;
@@ -8,18 +9,28 @@ use crate::response::ApiResponse;
 use axum::extract::Path;
 use axum::extract::State;
 use axum::Json;
-// use axum_valid::Valid;
 use sea_orm::{prelude::*, Condition, QueryOrder, Set};
 use serde::Deserialize;
 use std::fmt::{Display, Formatter};
 use validator::Validate;
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize, Validate, DeriveIntoActiveModel)]
 pub(crate) struct CreateUserRequest {
+    #[validate(length(
+        min = 1,
+        max = 14,
+        message = "fullname must be between 1 and 14 characters"
+    ))]
     pub fullname: String,
+    pub gender: Option<Gender>,
+    #[validate(custom(
+        function = "crate::request::is_email_valid",
+        message = "invalid email format, please check."
+    ))]
     pub email: String,
-    pub password: String,
-    pub ws_id: u64,
+    pub password_hash: String,
+    #[validate(range(min = 1, message = "ws_id must be greater than 0"))]
+    pub ws_id: i64,
 }
 
 #[derive(Debug, Deserialize, Validate)]
@@ -100,6 +111,11 @@ pub(crate) async fn create(
     State(state): State<AppState>,
     Json(user_data): Json<CreateUserRequest>,
 ) -> ApiResponse<Model> {
+    if let Err(ret) = user_data.validate() {
+        tracing::error!("error validating user: {:?}", ret);
+        return ApiResponse::error(format!("error validating user: {:?}", ret.to_string()));
+    }
+
     let db = state.db();
 
     let existing_user = Users::find()
@@ -118,9 +134,10 @@ pub(crate) async fn create(
 
     let new_user = ActiveModel {
         fullname: Set(user_data.fullname),
+        gender: Set(user_data.gender),
         email: Set(user_data.email),
-        password_hash: Set(user_data.password),
-        ws_id: Set(user_data.ws_id as i64),
+        password_hash: Set(user_data.password_hash),
+        ws_id: Set(user_data.ws_id),
         ..Default::default()
     };
 

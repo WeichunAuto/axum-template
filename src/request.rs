@@ -2,6 +2,11 @@ use crate::error::ApiError;
 use axum::extract::{FromRequest, FromRequestParts, Request};
 use axum_valid::HasValidate;
 use http::request::Parts;
+use regex::Regex;
+use std::borrow::Cow;
+use std::collections::HashMap;
+use std::sync::LazyLock;
+use validator::ValidationError;
 
 #[derive(Debug, Clone, Copy, Default, FromRequestParts)]
 #[from_request(via(axum::extract::Query), rejection(ApiError))]
@@ -27,43 +32,6 @@ pub struct BValidPath<T>(pub T);
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct BValidJson<T>(pub T);
-
-// impl<S, T> FromRequestParts<S> for BValidQuery<T>
-// where
-//     S: Send + Sync,
-//     BValid<BQuery<T>>: FromRequestParts<S, Rejection = ApiError>,
-// {
-//     type Rejection = ApiError;
-//
-//     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-//         let result = BValid::from_request_parts(parts, state).await?;
-//
-//         Ok(Self(result.0.0))
-//
-//     }
-// }
-//
-// impl<S, T> FromRequest<S> for BValidPath<T>
-// where
-//     S: Send + Sync,
-//     BValid<BPath<T>>: FromRequest<S, Rejection = ApiError>,
-// {
-//     type Rejection = ApiError;
-//     async fn from_request(request: Request, state: &S) -> Result<Self, Self::Rejection> {
-//         Ok(Self(BValid::from_request(request, state).await?.0.0))
-//     }
-// }
-//
-// impl<S, T> FromRequest<S> for BValidJson<T>
-// where
-//     S: Send + Sync,
-//     BValid<BJson<T>>: FromRequest<S, Rejection = ApiError>,
-// {
-//     type Rejection = ApiError;
-//     async fn from_request(request: Request, state: &S) -> Result<Self, Self::Rejection> {
-//         Ok(Self(BValid::from_request(request, state).await?.0.0))
-//     }
-// }
 
 impl<T> HasValidate for BQuery<T> {
     type Validate = T;
@@ -124,3 +92,19 @@ macro_rules! impl_from_request {
 impl_from_request!(BValidQuery, BQuery, FromRequestParts);
 impl_from_request!(BValidPath, BPath, FromRequest);
 impl_from_request!(BValidJson, BJson, FromRequest);
+
+static EMAIL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$").expect("Invalid email regex")
+});
+
+pub fn is_email_valid(value: &str) -> Result<(), ValidationError> {
+    if EMAIL_REGEX.is_match(value) {
+        Ok(())
+    } else {
+        Err(ValidationError {
+            code: Cow::from(""),
+            message: Some(Cow::from("invalid email format.")),
+            params: HashMap::new(),
+        })
+    }
+}

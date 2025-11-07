@@ -285,6 +285,7 @@ dependencies = [
  "config",
  "http",
  "num_cpus",
+ "regex",
  "sea-orm",
  "serde",
  "serde_json",

@@ -1,8 +1,12 @@
 
+
+CREATE TYPE GENDER AS ENUM('Male', 'Female', 'Intersex');
+
 -- create user table
 CREATE TABLE IF NOT EXISTS users (
-    id BIGSERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY CHECK (id >= 0),
     fullname VARCHAR(64) NOT NULL,
+    gender GENDER,
     email VARCHAR(64) NOT NULL UNIQUE,
     password_hash VARCHAR(97) NOT NULL,
     create_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
