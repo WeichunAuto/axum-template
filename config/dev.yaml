@@ -10,6 +10,8 @@ database:
   db_name: "axum_template"
   schema: "public"
 
+
+#database pool settings:
 pool:
   min_connections: 10
   max_connections: 20

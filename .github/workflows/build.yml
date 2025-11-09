@@ -5,6 +5,9 @@ on:
     branches: [ "main" ]          # Run on pushes to main branch
     tags: [ "v*" ]                # Trigger release workflow on version tags (e.g. v1.0.0)
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,6 +16,9 @@ jobs:
       # Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
+
+        with:
+          fetch-depth: 0
 
       # Set up Rust with the stable toolchain
       - name: Set up Rust
@@ -27,6 +33,9 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build release binary
+        run: cargo build --release --locked
 
       # Run tests (using nextest if available)
       - name: Run tests
