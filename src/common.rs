@@ -3,16 +3,24 @@ use std::fmt::Display;
 use std::str::FromStr;
 use validator::Validate;
 
+/// Default page number constant
 const DEFAULT_PAGE_NUMBER: u64 = 1;
-const DEFAULT_PAGE_SIZE: u64 = 2;
+
+/// Default page size constant
+const DEFAULT_PAGE_SIZE: u64 = 15;
+
+/// Pagination parameters structure
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Validate)]
 pub struct Pagination {
+    /// Current page number, starting from 1
     #[validate(range(min = 1, message = "page number must be greater than 0"))]
     #[serde(
         default = "default_page_number",
         deserialize_with = "deserialize_number"
     )]
     pub page: u64,
+
+    /// Number of items per page
     #[validate(range(
         min = 1,
         max = 100,
@@ -22,12 +30,18 @@ pub struct Pagination {
     pub size: u64,
 }
 
-/// page response
+/// Paginated response wrapper
+/// # Type Parameters
+/// - `T`: The type of items in the data collection
 #[derive(Debug, Serialize)]
 pub struct Page<T> {
+    /// Collection of items for the current page
     pub data: Vec<T>,
+    /// Total number of items across all pages
     pub total: u64,
+    /// Current page number
     pub page: u64,
+    /// Number of items per page
     pub size: u64,
 }
 
@@ -52,6 +66,11 @@ impl<T> Page<T> {
         Self::new(data, total, pagination.page, pagination.size)
     }
 }
+
+/// Deserializes numbers from either string or numeric JSON values
+///
+/// This function enables flexible input handling by accepting numbers
+/// in both string format (e.g., "123") and numeric format (e.g., 123).
 pub fn deserialize_number<'de, T, D>(deserializer: D) -> Result<T, D::Error>
 where
     T: FromStr + Deserialize<'de>,
