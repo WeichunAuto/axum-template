@@ -10,7 +10,7 @@ This repository aims to provide a **production-ready project template** for buil
 
 - **🔍 Integrated Tracing and Logging**: Built-in tracing middleware with automatic Request ID generation for every incoming request, enabling efficient log correlation and rapid issue diagnosis.
 
-- **🗄️ SeaORM Integration**: Seamlessly integrated with SeaORM for type-safe database operations, basic examples covering GET, POST, PATCH, and DELETE requests with path, query parameters, and payload body.
+- **🗄️ SeaORM Integration**: Seamlessly integrated with SeaORM for type-safe database operations, basic examples covering GET, POST, PATCH, and DELETE requests with path, request validation, query parameters, and payload body.
 
 - **⚙️ Dev and Prod separated Configuration**: Support for separate development and production environment configurations.
 
