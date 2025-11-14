@@ -134,6 +134,7 @@ impl Server {
                 let method = request.method();
                 let path = request.uri().path();
                 let id = xid::new(); // Generate unique request ID
+
                 tracing::info_span!("Api Request: ", id = %id, method = %method, path = %path)
             })
             .on_request(())

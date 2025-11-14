@@ -72,7 +72,6 @@ jobs:
         run: |
           git cliff -vv --latest --strip header -c cliff.toml -o CHANGES.md
 
-      # 🔧 修复4: 确保 CHANGES.md 文件存在
       - name: Ensure changelog exists
         if: startsWith(github.ref, 'refs/tags/')
         run: |

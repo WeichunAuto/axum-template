@@ -1,5 +1,8 @@
+use crate::error::ApiError;
 use axum::response::{IntoResponse, Response};
 use serde::{Deserialize, Serialize};
+
+pub type ApiResult<T> = Result<ApiResponse<T>, ApiError>;
 
 /// Standard API response structure
 ///

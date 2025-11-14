@@ -1,4 +1,5 @@
 use crate::response::ApiResponse;
+use axum::body::Body;
 use axum::extract::rejection::{JsonRejection, PathRejection, QueryRejection};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
@@ -12,8 +13,8 @@ pub enum ApiError {
     #[error("Method Not Allowed")]
     MethodNotAllowedError,
 
-    #[error("Biz Success")]
-    Biz,
+    #[error("Biz Error: {0}")]
+    BizError(String),
 
     #[error("Database Error: {0}")]
     DatabaseError(#[from] sea_orm::DbErr),
@@ -32,6 +33,12 @@ pub enum ApiError {
 
     #[error("Validation Error: {0}")]
     ValidationError(String),
+
+    #[error("JWT Error: {0}")]
+    JWTError(#[from] jsonwebtoken::errors::Error),
+
+    #[error("UnAuthorized Error: {0}")]
+    UnAuthenticatedError(String),
 }
 
 impl ApiError {
@@ -39,13 +46,14 @@ impl ApiError {
         match self {
             ApiError::NotFoundError => StatusCode::NOT_FOUND,
             ApiError::MethodNotAllowedError => StatusCode::METHOD_NOT_ALLOWED,
-            ApiError::Biz => StatusCode::OK,
+            ApiError::BizError(_) => StatusCode::OK,
             ApiError::DatabaseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::InternalError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::QueryError(_)
             | ApiError::PathError(_)
             | ApiError::JsonError(_)
             | ApiError::ValidationError(_) => StatusCode::BAD_REQUEST,
+            ApiError::JWTError(_) | ApiError::UnAuthenticatedError(_) => StatusCode::UNAUTHORIZED,
         }
     }
 }
@@ -63,5 +71,11 @@ impl From<ValidRejection<ApiError>> for ApiError {
             ValidRejection::Valid(errors) => ApiError::ValidationError(errors.to_string()),
             ValidRejection::Inner(errors) => errors,
         }
+    }
+}
+
+impl From<ApiError> for Response<Body> {
+    fn from(value: ApiError) -> Self {
+        value.into_response()
     }
 }
